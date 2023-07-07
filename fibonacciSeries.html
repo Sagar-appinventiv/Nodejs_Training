@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fibonacci Series</title>
+</head>
+<body>
+    <script>
+
+        let n = +prompt("Enter the terms: ");
+        document.write("Enter the number of terms: " + n + "<br>");
+
+        function fibSequence(n)
+        {
+
+        let initial = [0,1];
+        let fib = Array.from({length:n}).reduce((accum,curr,i)=>{
+            let next = accum[i] + accum[i+1];
+            accum.push(next);
+            return accum;
+        },initial);
+        return fib;
+
+        }
+        document.write("fibonacci series : " );
+        document.write(fibSequence(n));
+
+    </script>
+</body>
+</html>

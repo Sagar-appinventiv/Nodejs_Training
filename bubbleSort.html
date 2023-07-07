@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble sort</title>
+</head>
+<body>
+    <script>
+        
+        let arr = [1,3,2,5,4,7,6,9,8,0];
+        document.write("Input Array : " + arr);
+        function bubbleSort(arr)
+        {
+        return arr.reduce((accum, curr, i)=>{
+            for(i=0;i<arr.length;i++)
+            if(accum[i] > accum[i+1])
+            {
+                [accum[i], accum[i + 1]] = [accum[i + 1], accum[i]];
+            }
+            return accum;
+        }, arr);
+        }
+        document.write("<br>" + "Sorted Array : ");
+        document.write(bubbleSort(arr));
+    </script>
+</body>
+</html>
