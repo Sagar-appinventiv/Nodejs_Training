@@ -31,7 +31,7 @@ Follower.init(
     modelName: 'Follower',
   }
 );
-Follower.sync({force: false});
+Follower.sync();
 // Follower.belongsTo(User, { foreignKey: 'followerId' });
 // Follower.belongsTo(User, { foreignKey: 'userId' });
 
