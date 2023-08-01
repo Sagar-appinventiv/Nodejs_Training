@@ -1,0 +1,127 @@
+paths:
+  /addProduct:
+    post:
+      summary: Add a new product
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200':
+          description: Product added successfully
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+  /getProduct:
+    get:
+      summary: Get all products
+      tags:
+        - Products
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          description: Internal server error
+  /getProduct/{pId}:
+    get:
+      summary: Get a product by ID
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: pId
+          required: true
+          description: ID of the product to get
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+        '500':
+          description: Internal server error
+  /addBid/{pId}:
+    post:
+      summary: Add a bid to a product
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: pId
+          required: true
+          description: ID of the product to add bid to
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bid:
+                  type: integer
+                  description: Bid amount
+      responses:
+        '200':
+          description: Bid added successfully
+        '400':
+          description: Bad request
+        '404':
+          description: Product not found
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        base_price:
+          type: integer
+        current_bid:
+          type: integer
+        owner_id:
+          type: integer
+        bidder_id:
+          type: integer
+        category_id:
+          type: integer
+        address_id:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - name
+        - description
+        - base_price
+        - owner_id
+        - category_id
+        - address_id
+        - createdAt
+        - updatedAt
