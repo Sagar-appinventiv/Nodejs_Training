@@ -16,7 +16,8 @@ const Product = connection_1.sequelize.define('Products', {
     name: { type: sequelize_1.default.STRING },
     description: { type: sequelize_1.default.STRING },
     base_price: { type: sequelize_1.default.INTEGER },
-    current_bid: { type: sequelize_1.default.INTEGER,
+    current_bid: {
+        type: sequelize_1.default.INTEGER,
     },
     owner_id: { type: sequelize_1.default.INTEGER },
     bidder_id: { type: sequelize_1.default.INTEGER },

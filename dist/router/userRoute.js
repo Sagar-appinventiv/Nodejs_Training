@@ -11,9 +11,9 @@ const validation_1 = require("../middleware/validation");
 const userRouter = express_1.default.Router();
 exports.userRouter = userRouter;
 userRouter.get("/");
-userRouter.post("/signup", validation_1.userValidate, onboarding_controller_1.signUp.userLogin);
+userRouter.post("/signup", validation_1.userValidate, onboarding_controller_1.SignUp.signUpUser);
 userRouter.post("/login", validation_1.loginValidation, onboarding_controller_1.LoginUser.userLogin);
-userRouter.get("/logout", auth_1.authenticateToken, onboarding_controller_1.Logout.logout_user);
-userRouter.post('/forgot_pass', onboarding_controller_1.forgotPassword.forgot_password);
-userRouter.post('/reset_pass', onboarding_controller_1.forgotPassword.reset_password);
+userRouter.get("/logout", auth_1.authenticateToken, onboarding_controller_1.Logout.logoutUser);
+userRouter.post('/forgot_pass', onboarding_controller_1.ForgotPassword.forgot_password);
+userRouter.post('/reset_pass', onboarding_controller_1.ForgotPassword.reset_password);
 //# sourceMappingURL=userRoute.js.map
