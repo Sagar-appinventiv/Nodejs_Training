@@ -1,0 +1,72 @@
+tags:
+    name: User Onboarding 
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+        phone_number:
+          type: integer
+        status:
+          type: enum("Active", "Not Active")
+        DOB:
+          type: string
+          format: date
+
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    ForgotPassword:
+      type: object
+      properties:
+        email:
+          type: string
+
+paths:
+  /signup:
+    post:
+      summary: Create a new user
+      tags: [User Onboarding]
+      description: Use this endpoint to create a new user account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User created successfully
+        '400':
+          description: Invalid request body
+
+  /login:
+    post:
+      summary: User login
+      tags: [User Onboarding]
+      description: Use this endpoint to authenticate a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: User logged in successfully
+        '401':
+          description: Unauthorized
+
+# ------------------------------------------------------------------------ #
+
