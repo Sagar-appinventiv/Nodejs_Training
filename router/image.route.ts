@@ -5,7 +5,6 @@ import { upload } from "../middleware/multer.image";
 const imageRouter = express.Router();
 
 imageRouter.get("/");
-imageRouter.post("/addImage/:pid",upload.array('images',5),image.addimages);
-// productRoute.route('/addimages/:pid').post(authenticateToken,upload.array('images',5),setproductimagesController);
+imageRouter.post("/addImage/:pid", authenticateToken, upload.array('images', 5), image.addimages);
 
-export {imageRouter};
+export { imageRouter };

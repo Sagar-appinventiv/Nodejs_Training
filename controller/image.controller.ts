@@ -9,9 +9,7 @@ export class image {
             const files = req.files;
             const bufferDataArray = [];
             for (let file in files) {
-                // console.log(files[file].path);
                 const fileData = fs.readFileSync(files[file].path);
-                // console.log(fileData);
                 const bufferData = Buffer.from(fileData);
                 bufferDataArray.push(bufferData);
                 console.log(bufferData);

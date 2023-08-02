@@ -10,19 +10,19 @@ const authenticateToken = (req, res, next) => {
   if (authHeader) {
     const token = authHeader;
     console.log(authHeader);
-    
+
     jwt.verify(token, SECRET_KEY, (err, user) => {
       if (err) {
-        return res.sendStatus(403).json({message: "token is incorrect"});
+        return res.sendStatus(403).json({ message: "token is incorrect" });
       }
       // console.log(user);
-      
+
       req.user = user;
       next();
     });
   } else {
-    res.sendStatus(401).json({message: "header is empty"});
+    res.sendStatus(401).json({ message: "header is empty" });
   }
 };
 
-export {authenticateToken};
+export { authenticateToken };

@@ -1,6 +1,4 @@
 import { User } from "../models/user.model";
-import { SingnUpschema } from "../middleware/validation";
-import joi from "@hapi/joi";
 import jwt from "jsonwebtoken";
 import { Redis } from "../middleware/redis.session";
 import { createClient } from "redis";
@@ -11,9 +9,6 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import nodemailer from "nodemailer";
 
-// const redisClient = createClient();
-// redisClient.on('error', err => console.log('Redis client error', err));
-// redisClient.connect();
 
 dotenv.config();
 
@@ -24,30 +19,26 @@ export class signUp {
         const details = req.body;
         // console.log(details);
         try {
-            const { error, value } = await SingnUpschema.validate(details);
-            if (error) {
-                res.status(400).json({ message: "Invalid user input" });
+            const user = await User.findOne({ where: { email: details.email } });
+            // console.log(user);
+            if (user) {
+                res.status(409).json({ message: "User already exist" });
             } else {
-                const user = await User.findOne({ where: { email: details.email } });
-                // console.log(user);
-                if (user) {
-                    res.status(409).json({ message: "User already exist" });
-                } else {
-                    const salt = await bcrypt.genSalt(10);
-                    const hashPassword = await bcrypt.hash(details.password, salt);
-                    // console.log(hashPassword);
-                    const newUser = await User.create({
-                        email: details.email,
-                        name: details.name,
-                        password: hashPassword,
-                        phone_number: details.phone_number,
-                        status: details.status,
-                        DOB: details.DOB
-                    });
-                    // console.log(newUser);
-                    res.status(201).json({ message: "User registered successfully" });
-                }
+                const salt = await bcrypt.genSalt(10);
+                const hashPassword = await bcrypt.hash(details.password, salt);
+                // console.log(hashPassword);
+                const newUser = await User.create({
+                    email: details.email,
+                    name: details.name,
+                    password: hashPassword,
+                    phone_number: details.phone_number,
+                    status: details.status,
+                    DOB: details.DOB
+                });
+                // console.log(newUser);
+                res.status(201).json({ message: "User registered successfully" });
             }
+            // }
         } catch (error) {
             res.status(500).json({ message: "Server Error" });
         }
@@ -63,7 +54,6 @@ export class LoginUser {
         try {
             const device = req.headers.device;
             console.log(device);
-            await Auth.verify_login_details.validateAsync(detail);
             const user = await User.findOne({ where: { email: detail.email } });
             console.log(user);
             if (user) {
@@ -101,12 +91,12 @@ export class LoginUser {
 
 export class Logout {
     static async logout_user(req: any, res: any) {
-        const redisClient = createClient(); 
+        const redisClient = createClient();
         redisClient.on('error', err => console.log('Redis client error', err));
         await redisClient.connect();
         try {
             const userToken = await Auth.verify_token(req);
-            const user = await User.findOne({ where: { email: userToken } }); 
+            const user = await User.findOne({ where: { email: userToken } });
             console.log(user);
             if (user) {
                 const id = user.id;
@@ -120,12 +110,12 @@ export class Logout {
                         const updatedUserSession = await Session.update({ status: !userSession.status },
                             {
                                 where:
-                                    { id: userSession.id } 
+                                    { id: userSession.id }
                             });
                         console.log(updatedUserSession);
                         res.status(201).json({ message: "User logOut Successfully" });
-                    }   
-                }   
+                    }
+                }
             }
         }
         catch (err) {
@@ -162,11 +152,12 @@ export class forgotPassword {
 
             const mailOptions = {
                 from: process.env.EMAIL_ADDRESS,
-                to: 'sagarsky26@gmail.com',
+                to: email,
                 subject: 'Password Reset Request',
-                text: `Please click on the following link, or paste this into your browser to complete the process:\n\n
-                        ${process.env.CLIENT_URL}/RESET PASSWORD OTP: ${OTP}`,        
-                        };
+                text: ` Please click on the following link, or paste this into your browser to complete the process:\n\n
+                        ${process.env.CLIENT_URL}/RESET PASSWORD OTP: ${OTP}\n\n
+                        If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+            };
 
             transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
@@ -213,4 +204,3 @@ export class forgotPassword {
         }
     }
 }
-

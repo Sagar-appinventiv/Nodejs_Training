@@ -1,26 +1,26 @@
-import express, { Router } from "express";
+import express from "express";
 import * as  dotenv from 'dotenv';
-import { sequelize, dbconnection } from "./core/connection";
+import { dbconnection } from "./core/connection";
 import { appRoutes } from "./router/index.route";
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 
-const options:swaggerJSDoc.options = {
+const options: swaggerJSDoc.options = {
     definition: {
         openapi: '3.0.0',
         info: {
             title: "Advertisment Management System",
             version: "1.0.0"
         },
-        schemas:['http', 'https'],
+        schemas: ['http', 'https'],
         servers: [
-        {
-            url: "http://localhost:3003/"
-        }
+            {
+                url: "http://localhost:3003/"
+            }
         ]
     },
-    apis: ['./swagger/user.servicedoc.yaml','./swagger/product.servicedoc.yaml'],
-    
+    apis: ['./swagger/user.servicedoc.yaml', './swagger/product.servicedoc.yaml'],
+
 };
 
 const app = express();

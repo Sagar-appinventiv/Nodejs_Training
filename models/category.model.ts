@@ -1,5 +1,5 @@
 import Sequelize from "sequelize";
-import { sequelize, dbconnection } from "../core/connection";
+import { sequelize } from "../core/connection";
 const Category = sequelize.define('Categories', {
     id: {
         allowNull: false,

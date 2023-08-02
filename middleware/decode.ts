@@ -1,4 +1,3 @@
-import Joi from '@hapi/joi';
 import dotenv from 'dotenv';
 import jwt from "jsonwebtoken";
 import { User } from '../models/user.model';
@@ -8,9 +7,9 @@ dotenv.config();
 
 const key = process.env.SECRET_KEY;
 
-export class Auth{
+export class Auth {
 
-    static async verify_token(req:any) {
+    static async verify_token(req: any) {
         const token = req.headers.authorization;
         console.log(token);
         if (token) {
@@ -22,13 +21,9 @@ export class Auth{
         }
     }
 
-    static verify_login_details = Joi.object({
-        email: Joi.string().email().required(),
-        password: Joi.string().min(5).max(30).required()
-    });
 
     static async find_user(email) {
-        const isUser = await User.findOne({ where: { email} });
+        const isUser = await User.findOne({ where: { email } });
         if (isUser) {
             return isUser;
         }

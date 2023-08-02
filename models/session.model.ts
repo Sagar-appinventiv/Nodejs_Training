@@ -1,5 +1,5 @@
 import Sequelize from "sequelize";
-import { sequelize, dbconnection } from "../core/connection";
+import { sequelize } from "../core/connection";
 
 const Session = sequelize.define('Sessions', {
     id: {
@@ -8,9 +8,9 @@ const Session = sequelize.define('Sessions', {
         primaryKey: true,
         type: Sequelize.INTEGER
     },
-    user_id: {type: Sequelize.INTEGER},
-    device_id: {type: Sequelize.STRING},
-    status: {type: Sequelize.BOOLEAN},
+    user_id: { type: Sequelize.INTEGER },
+    device_id: { type: Sequelize.STRING },
+    status: { type: Sequelize.BOOLEAN },
     createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -20,4 +20,4 @@ const Session = sequelize.define('Sessions', {
         type: Sequelize.DATE
     }
 });
-export{Session};
+export { Session };
