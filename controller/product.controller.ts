@@ -13,7 +13,6 @@ export class product {
     }
 
     static async getProduct(req: any, res: any,) {
-
         try {
             let prod = await Product.findByPk(req.query.id)
             res.status(201).json(prod);
@@ -26,7 +25,6 @@ export class product {
 
     static async addbid(req: any, res: any) {
         try {
-
             const pid = req.params.pid;
             const currentBid = req.body.currentBid;
             const bidderId = req.body.bidder_id;
