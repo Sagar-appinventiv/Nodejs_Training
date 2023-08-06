@@ -1,0 +1,1 @@
+?Applied Change Stream on 2 collections inside single DB using MongoDB Atlas and performing Insert operation on both collections by creating 2 API's so that data inserted in one collection will be Synced to another collection, Preventing circular loop
