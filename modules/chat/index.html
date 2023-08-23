@@ -1,0 +1,82 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One-to-One Chat</title>
+</head>
+<body>
+  <h1>One-to-One Chat</h1>
+  <div>
+    <label for="userId">Your User ID:</label>
+    <input type="text" id="userId" placeholder="Enter your user ID">
+    <button id="joinButton">Join Chat</button>
+  </div>
+  <div>
+    <label for="recipientId">Recipient User ID:</label>
+    <input type="text" id="recipientId" placeholder="Enter recipient's user ID">
+    <button id="sendMessageButton">Send Message</button>
+  </div>
+  <div>
+    <h2>Chat Log:</h2>
+    <ul id="chatLog"></ul>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const userIdInput = document.getElementById('userId');
+    const recipientIdInput = document.getElementById('recipientId');
+    const joinButton = document.getElementById('joinButton');
+    const sendMessageButton = document.getElementById('sendMessageButton');
+    const chatLog = document.getElementById('chatLog');
+    let socket;
+
+    joinButton.addEventListener('click', () => {
+      const userId = userIdInput.value;
+      socket = io();
+      socket.emit('join', userId);
+      console.log(`Joined chat as user ${userId}`);
+    });
+
+    sendMessageButton.addEventListener('click', () => {
+      const from = userIdInput.value;
+      const to = recipientIdInput.value;
+      const message = prompt('Enter your message:');
+      socket.emit('message', { from, to, message });
+    });
+
+    socket.on('message', (data) => {
+      const messageElement = document.createElement('li');
+      messageElement.textContent = `${data.from}: ${data.message}`;
+      chatLog.appendChild(messageElement);
+    });
+  </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wassup chat app</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <section class="chat__section">
+        <div class="brand">
+            <img height="40" src="/wassup.png" alt="">
+            <h1>SoulSync</h1>
+        </div>
+        <div class="message__area"></div>
+        <div>
+            <textarea id="textarea" cols="30" rows="1" placeholder="Write a message..."></textarea>
+        </div>
+    </section>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/client.js"></script>
+</body>
+
+</html>
