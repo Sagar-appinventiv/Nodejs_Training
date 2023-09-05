@@ -29,6 +29,10 @@ const User = sequelize.define('user', {
         allowNull: true,
         defaultValue: false,
     },
+    bio: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+    },
     mobileNo: {
         type: Sequelize.STRING,
         allowNull: true,
@@ -58,8 +62,29 @@ const User = sequelize.define('user', {
         type: Sequelize.STRING,
         allowNull: true,
     },
-    notifications: {
+    // notifications: {
+    //     type: Sequelize.ARRAY(Sequelize.JSONB),
+    //     defaultValue: [],
+    // },
+    galleryPhotos: {
+        type: Sequelize.ARRAY(Sequelize.STRING),
+        allowNull: true,
+        // validate: {
+        //     validateGalleryPhotos(value:any) {
+        //         if (value.length > 4) {
+        //             throw new Error('Gallery can have a maximum of 4 photos.');
+        //         }
+        //     }
+        // },
+    },
+    blockedUsers: {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+        allowNull: true,
+        defaultValue: [],
+    },
+    matches: {
         type: Sequelize.ARRAY(Sequelize.JSONB),
+        allowNull: true,
         defaultValue: [],
     },
     createdAt: {
@@ -72,8 +97,6 @@ const User = sequelize.define('user', {
     }
 });
 
-(async function () {
-    await User.sync({ alter: true })
-})();
+// User.sync({ alter: true });
 
 export { User };

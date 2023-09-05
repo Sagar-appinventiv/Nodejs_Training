@@ -60,8 +60,8 @@ const ArchivedUser = sequelize.define('archivedUsers', {
     }
 });
 
-(async function () {
-    await ArchivedUser.sync({ alter: true })
-})();
+// (async function () {
+//     await ArchivedUser.sync({ alter: true })
+// })();
 
 export { ArchivedUser };

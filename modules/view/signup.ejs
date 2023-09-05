@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration</title>
+  <link rel="stylesheet" href="static/css/signup.style.css">
+</head>
+
+<body>
+  <div class="wrapper">
+    <h2>Registration</h2>
+    <form action="/signup" method="POST" id="registrationForm">
+      <div class="input-box">
+        <input type="text" name="fullName" placeholder="Enter your name" required>
+      </div>
+      <div class="input-box">
+        <input type="text" name="email" placeholder="Enter your email" required>
+      </div>
+      <div class="input-box">
+        <input type="password" name="password" placeholder="Create password" required>
+      </div>
+      <div class="input-box button">
+        <input type="Submit" value="Register Now" id="registerButton">
+      </div>
+      <div class="text">
+        <h3>Already have an account? <a href="/">Login now</a></h3>
+      </div>
+    </form>
+    <script>
+      document.getElementById("registerButton").addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent the default form submission
+        const form = document.getElementById("registrationForm");
+        const fullName = form.elements["fullName"].value;
+        const email = form.elements["email"].value;
+        const password = form.elements["password"].value;
+
+        if (fullName && email && password) {
+          // All fields are filled, so submit the form
+          form.submit();
+        } else {
+          alert("Please fill in all fields before registering.");
+        }
+      });
+    </script>
+  </div>
+</body>
+
+</html>

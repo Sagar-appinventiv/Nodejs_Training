@@ -35,7 +35,20 @@ const Like =  sequelize.define('like',{
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
     },
 });
+
+Like.findMatchesForUser = async function (userId: any) {
+    const matches = await Like.findAll({
+        where: {
+            likerId: userId,
+        },
+    });
+
+    return matches;
+};
 Like.isMatch = async function (likerId:any, likedUserId:any) {
+    if (!likerId || !likedUserId) {
+        return false; // Return false if either value is undefined
+    }
     const matchCount = await Like.count({
         where: {
             likerId: likedUserId,
@@ -45,6 +58,6 @@ Like.isMatch = async function (likerId:any, likedUserId:any) {
 
     return matchCount > 0;
 };
-Like.sync({ alter: true });
+// Like.sync({ alter: true });
 
 export { Like };

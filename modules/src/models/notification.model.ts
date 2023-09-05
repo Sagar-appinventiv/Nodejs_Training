@@ -36,7 +36,7 @@ const Notification = sequelize.define('notification', {
         defaultValue: Sequelize.NOW,
     },
 })
-Notification.sync({ alter: true })
+// Notification.sync({ alter: true })
 
 export { Notification };
 

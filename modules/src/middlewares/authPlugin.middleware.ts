@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 import dotenv from 'dotenv';
 dotenv.config();
 
-const plugin = {
+const authPlugin = {
     name: "jwt-authentication",
     version:'1.0.0',
     register: async function(server:any, options:any) {
@@ -12,13 +12,13 @@ const plugin = {
         server.auth.strategy('user', 'jwt', {
             key: process.env.SECRET_KEY,
             validate: async (decoded: any, request:any, h:any) => {
-                // request.user = decoded;
+                request.user = decoded;
                 return {isValid : true};
             }
         });
-        server.auth.default('user');
+        // server.auth.default('user');
 
     }
 }
 
-export default plugin;
+export default authPlugin;

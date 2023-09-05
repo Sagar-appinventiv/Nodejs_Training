@@ -9,16 +9,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export class StripeWebhookController {
+    /***************************************************/
+    /*********** Fetching Payment Status API ***********/
+    /***************************************************/
     static async handleCheckoutCompletedEvent(request: Request, h: ResponseToolkit) {
             // const event: Stripe.Event = request.payload as Stripe.Event;
-            const payload:any = request.payload;
-            const sigHeader = request.headers['stripe-signature'];
-
-            console.log('Stripe-Signature Header:', sigHeader);
-console.log('Raw Payload:', payload);
+            
             try {
-            const event = stripe.webhooks.constructEvent(payload, sigHeader, process.env.STRIPE_WEBHOOK_SECRET!);
-            console.log('Received webhook event:', event);
+                const event: Stripe.Event = request.payload as Stripe.Event;
+                console.log('Received webhook event:', event);
             const eventType = event.type;
             console.log('Event type:', eventType);
 

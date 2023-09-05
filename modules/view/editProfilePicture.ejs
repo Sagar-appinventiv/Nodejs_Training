@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile Picture</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .profile-picture {
+            max-width: 200px;
+            height: auto;
+            border-radius: 50%;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        label {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        label:hover {
+            background-color: #0056b3;
+        }
+
+        #upload-button {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Edit Profile Picture</h2>
+        <img id="profile-picture" class="profile-picture" src="default-profile.png" alt="Profile Picture">
+
+        <label for="file-upload">Choose a file</label>
+        <input id="file-upload" class="file-input" type="file" accept="image/*">
+        <button id="upload-button">Upload</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-upload');
+        const uploadButton = document.getElementById('upload-button');
+        const profilePicture = document.getElementById('profile-picture');
+
+        fileInput.addEventListener('change', () => {
+            const selectedFile = fileInput.files[0];
+
+            if (selectedFile) {
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    profilePicture.src = event.target.result;
+                    uploadButton.style.display = 'block';
+                };
+
+                reader.readAsDataURL(selectedFile);
+            }
+        });
+
+        uploadButton.addEventListener('click', () => {
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/set-profilePicture', {
+                method: 'GET',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Profile picture uploaded successfully') {
+                        alert(data.message);
+                    } else {
+                        alert('Error uploading profile picture');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Error uploading profile picture');
+                });
+        });
+    </script>
+</body>
+
+</html>

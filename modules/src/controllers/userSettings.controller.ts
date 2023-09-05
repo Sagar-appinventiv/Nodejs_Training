@@ -12,7 +12,6 @@ import { promisify } from 'util';
 import { ArchivedUser } from "../models/archivedUser.model";
 import JSONTransport from "nodemailer/lib/json-transport";
 
-
 export class UserSettingsController {
 
     /***************************************************/
@@ -31,7 +30,7 @@ export class UserSettingsController {
             const isActive = await Session.findOne({ where: { userId: isUser.id } });
             console.log(isActive);
             if (!isActive.status) {
-                return h.response({ status: "User is inactive" });
+                return h.response({ status: "!!! User is inactive !!!" });
             }
             else {
                 const isValidPassword = await bcrypt.compare(oldPassword, isUser.password);
@@ -67,7 +66,7 @@ export class UserSettingsController {
             if (isActive.status) {
                 const existingUser = await ArchivedUser.findOne({ where: { email: isUser.email } });
 
-                if(existingUser) {
+                if (existingUser) {
                     await existingUser.update({
                         fullName: isUser.fullName,
                         email: isUser.email,
@@ -81,20 +80,20 @@ export class UserSettingsController {
                         dateOfBirth: isUser.dateOfBirth
                     })
 
-                }else {
-                await ArchivedUser.create({
-                    fullName: isUser.fullName,
-                    email: isUser.email,
-                    password: isUser.password,
-                    mobile_no: isUser.mobile_no,
-                    profilePicture: isUser.profilePicture,
-                    interestedIn: isUser.interestedIn,
-                    gender: isUser.gender,
-                    areaLocality: isUser.areaLocality,
-                    hobbies: isUser.hobbies,
-                    dateOfBirth: isUser.dateOfBirth
-                })
-            }
+                } else {
+                    await ArchivedUser.create({
+                        fullName: isUser.fullName,
+                        email: isUser.email,
+                        password: isUser.password,
+                        mobile_no: isUser.mobile_no,
+                        profilePicture: isUser.profilePicture,
+                        interestedIn: isUser.interestedIn,
+                        gender: isUser.gender,
+                        areaLocality: isUser.areaLocality,
+                        hobbies: isUser.hobbies,
+                        dateOfBirth: isUser.dateOfBirth
+                    })
+                }
                 await Session.destroy({ where: { userId: isUser.id } });
                 await isUser.destroy();
                 // console.log(isUser);
@@ -118,44 +117,116 @@ export class UserSettingsController {
             const isUser = await User.findOne({ where: { email: user.email } });
             const isActive = await Session.findOne({ where: { userId: isUser.id } });
             if (!isActive.status) {
-                return h.response({ status: "User is inactive" });
+                return h.response({ status: "!!! User is inactive !!!" });
             }
             else {
                 const data: any = request.payload;
-                return data;
-                console.log("data?>>>>>>>>>>>S",JSON.stringify(data));
+                // return data;
+                // console.log("data?>>>>>>>>>>>S",JSON.stringify(data));
                 if (!data.file) {
-                    return h.response({ message: "No file Provided" }).code(400);
+                    return h.response({ message: "!!! No file Provided !!!" }).code(400);
                 }
-                const name = data.file.filename;
-                console.log("name>>>>>>>>>",name);
-                const path = `${process.cwd()}/src/uploads/` + name;
+                const name = data.file.hapi.filename;
+                // console.log("name>>>>>>>>>",name);
+                const path = `${process.cwd()}/view/uploads/` + name;
 
                 const file = fs.createWriteStream(path);
-                console.log(file);
+                // console.log(file);
                 data.file.pipe(file);
 
                 return new Promise((resolve, reject) => {
                     file.on('finish', async () => {
                         try {
-                            await User.update({ profilePicture: name }, {where: { email: isUser.email }
+                            await User.update({ profilePicture: name }, {
+                                where: { email: isUser.email }
                             });
-                            resolve(h.response({ message: "Profile picture uploaded successfully" }).code(200));
+                            resolve(h.response({ message: "------- Profile picture uploaded successfully -------" }).code(200));
                         } catch (error) {
                             console.log("Error", error);
-                            reject(h.response({ message: "Error updating profile picture" }).code(500));
+                            reject(h.response({ message: "!!! Error updating profile picture !!!" }).code(500));
                         }
                     });
 
                     file.on('error', (error) => {
-                        console.log(error);
-                        reject(h.response({ message: "Error writing file" }).code(500));
+                        // console.log(error);
+                        reject(h.response({ message: "!!! Error writing file !!!" }).code(500));
                     });
                 });
             }
         } catch (error) {
             console.log("ERROR", error);
-            return h.response({message:"Error:"}).code(500);
+            return h.response({ message: "Error:" }).code(500);
+        }
+    }
+
+    /***************************************************/
+    /******************** Gallery API ******************/
+    /***************************************************/
+    static async setGalleryPhotos(request: any, h: any) {
+        try {
+            const user = request.auth.credentials;
+            const isUser = await User.findOne({ where: { email: user.email } });
+
+            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            if (!isActive.status) {
+                return h.response({ status: "!!! User is inactive !!!" });
+            }
+            if (!isUser || !isUser.verifiedUser) {
+                return h.response({ status: '!!! User is not verified !!!' }).code(403);
+            }
+            else {
+                const data: any = request.payload;
+                // return data;
+                // console.log("data?>>>>>>>>>>>S",JSON.stringify(data));
+                console.log(data.file);
+                if (!data.file.length) {
+                    return h.response({ message: "!!! No file Provided !!!" }).code(400);
+                }
+
+                const name: any = [];
+                for (let i = 0; i < data.file.length; i++) {
+                    const img_name = data.file[i].hapi.filename;
+                    name.push(img_name);
+                    // console.log("name>>>>>>>>>",name);
+                    const path = `${process.cwd()}/view/uploads/` + img_name;
+
+                    const file = fs.createWriteStream(path);
+                    // console.log(file);
+                    data.file[i].pipe(file);
+
+                    // file.on('finish', async () => {
+                    //     try {
+                    //         await User.update({ galleryPhotos: [name] }, {
+                    //             where: { email: isUser.email }
+                    //         });
+                    //         console.log("Success");
+                    //         // h.response({ message: "------- Profile picture uploaded successfully -------" }).code(200);
+                    //     } catch (error) {
+                    //         console.log("Error", error);
+                    //         // h.response({ message: "!!! Error updating profile picture !!!" }).code(500);
+                    //     }
+                    // });
+
+                    // file.on('error', (error) => {
+                    //     console.log(error);
+                    //     // h.response({ message: "!!! Error writing file !!!" }).code(500);
+                    // });
+                }
+
+                try{
+                    await User.update({ galleryPhotos: name }, {
+                                    where: { email: isUser.email }
+                                });
+                    return h.response({message: "success"});
+                }
+                catch(err){
+                    console.log(err);
+                    return h.response("error");
+                }
+            }
+        } catch (error) {
+            console.log("ERROR", error);
+            return h.response({ message: "Error:" }).code(500);
         }
     }
 }
