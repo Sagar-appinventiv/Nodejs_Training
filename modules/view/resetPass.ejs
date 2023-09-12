@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .reset-form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+
+        .reset-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .reset-form input[type="email"],
+        .reset-form input[type="password"],
+        .reset-form input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .reset-form button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .reset-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reset-form">
+        <h2>Reset Password</h2>
+        <form action="/reset-password" method="POST">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="otp" placeholder="Enter OTP" required>
+            <input type="password" name="newPassword" placeholder="New Password" required>
+            <button type="submit" value="Reset Password" id="resetButton">Reset Password</button>
+        </form>
+        <script>
+            document.getElementById("resetButton").addEventListener("click", function (event) {
+                const emailField = document.querySelector('input[name="email"]');
+                const otpField = document.querySelector('input[name="otp"]');
+                const newPasswordField = document.querySelector('input[name="newPassword"]');
+
+                if (!emailField.value || !otpField.value || !newPasswordField.value) {
+                    alert("Please fill in all fields before resetting the password.");
+                    event.preventDefault(); // Prevent the form submission
+                }
+            });
+        </script>
+    </div>
+</body>
+
+</html>

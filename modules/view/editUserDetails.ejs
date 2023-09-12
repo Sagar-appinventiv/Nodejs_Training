@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .form-container {
+      background-color: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+      width: 400px;
+    }
+
+    .form-container label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .form-container input[type="text"],
+    .form-container input[type="tel"],
+    .form-container select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-container input[type="checkbox"] {
+      margin-right: 5px;
+    }
+
+    .form-container button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .form-container button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <title>Details Form</title>
+</head>
+
+<body>
+  <div class="form-container">
+    <h2>Insert Details</h2>
+    <form action="/update-details" method="POST">
+      <fieldset>
+        <legend>Personal Information</legend>
+        <label for="fullname">Full Name</label>
+        <input type="text" id="fullname" name="fullName" required>
+
+        <label for="gender">Gender</label>
+        <select id="gender" name="gender" required>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+
+        <label for="dob">Date of Birth</label>
+        <input type="date" id="dob" name="dateOfBirth" required>
+
+      </fieldset>
+
+      <fieldset>
+        <legend>Contact Information</legend>
+        <label for="interestedin">Interested In</label>
+        <input type="text" id="interestedin" name="interestedIn" required>
+
+        <label for="locality">Area Locality</label>
+        <input type="text" id="locality" name="areaLocality" required>
+
+        <label for="mobile">Mobile</label>
+        <input type="tel" id="mobile" name="mobileNo" required>
+
+      </fieldset>
+
+      <button type="submit" id="updateButton">Submit</button>
+    </form>
+
+    <script>
+      document.getElementById("UpdateButton").addEventListener('click', function () {
+        window.location.href = "./view-own-profile"
+      })
+    </script>
+  </div>
+</body>
+
+</html>

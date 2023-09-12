@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        #menuToggle {
+            display: none;
+        }
+
+        #menuIcon {
+            font-size: 24px;
+            cursor: pointer;
+            display: block;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
+
+        .nav-links {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .nav-links li {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #ffffff;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .nav-links a:hover {
+            color: #f0f0f0;
+        }
+
+        .user-details {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .user-details img {
+            max-width: 450px;
+            height: 400px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .user-details h2 {
+            margin-bottom: 10px;
+        }
+
+        .user-details label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        .user-details p {
+            margin-bottom: 20px;
+        }
+
+        .edit-button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .edit-button:hover {
+            background-color: #0056b3;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+        }
+
+        .edit-form {
+            display: none;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .edit-form label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .edit-form input,
+        .edit-form select,
+        .edit-form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .edit-form .submit-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            position: absolute;
+            top: 0;
+            left: -260px;
+            /* Start hidden */
+            width: 250px;
+            height: 100%;
+            background-color: #007bff;
+            padding-top: 60px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease-in-out;
+        }
+
+        #menuToggle:checked+.hamburger-menu {
+            left: 0;
+        }
+
+        .hamburger-menu ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .hamburger-menu li {
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        .hamburger-menu a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 18px;
+            transition: color 0.3s ease-in-out;
+        }
+
+        .hamburger-menu a:hover {
+            color: #f0f0f0;
+        }
+
+        /* Style Delete Account Button */
+        .hamburger-menu .delete-account-button {
+            background-color: #f44336;
+            /* Red color for delete button */
+            color: #ffffff;
+            font-size: 18px;
+            padding: 10px 0;
+        }
+
+        .hamburger-menu .delete-account-button:hover {
+            background-color: #d32f2f;
+            /* Darker red on hover */
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <input type="checkbox" id="menuToggle">
+        <label for="menuToggle" id="menuIcon"><i class="fas fa-bars"></i></label>
+
+        <ul class="nav-links">
+            <li><a href="#">Gallery</a></li>
+            <li><a href="#">Home</a></li>
+            <!-- <li><a href="/logout">Logout</a></li> -->
+        </ul>
+
+        <div class="hamburger-menu">
+            <ul>
+                <li><a href="/logout">Logout</a></li>
+                <!-- Add the Delete Account button here -->
+                <li><a href="/delete-account" class="delete-account-button">Delete Account</a></li>
+            </ul>
+        </div>
+    </header>
+    <% if(user) { %>
+        <div class="user-details">
+            <img src="<%= 'static/uploads/' + user.profilePicture %>" alt="Profile Picture">
+            <h2>
+                <%= user.fullName %>
+                    <% if (user.verifiedUser) { %>
+                        <i class="fas fa-check-circle" title="Verified User" style="color: rgb(126, 109, 228);"></i>
+                        <% } %>
+            </h2>
+
+            <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+            <p>
+                <%= user.email %>
+            </p>
+
+            <label for="mobile"><i class="fas fa-phone"></i> Mobile:</label>
+            <p>
+                <%= user.mobileNo %>
+            </p>
+
+            <label for="gender"><i class="fas fa-venus-mars"></i> Gender:</label>
+            <p>
+                <%= user.gender %>
+            </p>
+
+            <label for="interestedin"><i class="fas fa-heart"></i> Interested In:</label>
+            <p>
+                <%= user.interestedIn %>
+            </p>
+
+            <label for="dateOfBirth"><i class="fas fa-calendar-alt"></i> Date Of Birth:</label>
+            <p>
+                <%= user.dateOfBirth %>
+            </p>
+
+            <label for="areaLocality"><i class="fas fa-map-marker-alt"></i> City:</label>
+            <p>
+                <%= user.areaLocality %>
+            </p>
+
+            <label for="hobbies"><i class="fas fa-guitar"></i> Hobbies:</label>
+            <p>
+                <%= user.hobbies %>
+            </p>
+
+            <a href="./editUserDetails" class="edit-button" id="editButton">Edit Profile</a>
+            <a href="/editProfilePicture" class="edit-button" id="editProfilePicButton">Edit Profile Picture</a>
+
+        </div>
+        <% } %>
+            <script>
+                const menuToggle = document.getElementById("menuToggle");
+                const hamburgerMenu = document.querySelector(".hamburger-menu");
+
+                menuToggle.addEventListener("change", function () {
+                    if (menuToggle.checked) {
+                        hamburgerMenu.style.left = "0";
+                    } else {
+                        hamburgerMenu.style.left = "-260px";
+                    }
+                });
+            </script>
+</body>
+
+</html>

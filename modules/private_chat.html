@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Chat</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="user-list">
+            <h2>Matched Users</h2>
+            <ul id="matchedUsersList">
+                <li data-user-id="user1_id">User 1</li>
+                <li data-user-id="user2_id">User 2</li>
+                <!-- ... Populate this list with matched user names -->
+            </ul>
+        </div>
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-header">
+                <h2>Private Chat</h2>
+            </div>
+            <div class="chat-messages" id="messages"></div>
+            <div class="chat-input">
+                <input id="messageInput" type="text" placeholder="Type a message...">
+                <button id="sendMessage">Send</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
