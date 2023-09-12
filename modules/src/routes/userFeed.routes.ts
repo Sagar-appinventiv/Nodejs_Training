@@ -36,6 +36,9 @@ const userFeedRoutes: ServerRoute[] = [
             tags: ['api','User feed APIs'],
             description: 'Block an user API',
             validate: {
+                params: Joi.object({
+                    blockedUserId: Joi.number().required(),
+                }),
                 options: {
                     allowUnknown:true,
                     security:[{ apiKey:[] }]
@@ -51,6 +54,9 @@ const userFeedRoutes: ServerRoute[] = [
         options: { tags: ['api','User feed APIs'],
         description: 'Deleting user from blocked list',
         validate: {
+            params: Joi.object({
+                userId: Joi.number().required(),
+            }),
             options: {
                 allowUnknown: true,
                 security: [{ apiKey: [] }],

@@ -57,7 +57,10 @@ const userSettingsRoutes: ServerRoute[] = [{
             options: {
                 allowUnknown: true,
                 security: [{ apiKey: [] }]
-            }
+            },
+            payload: Joi.object({
+                file: Joi.any().required(),
+            })
         },
         auth: 'user',
         payload: {
@@ -85,7 +88,10 @@ const userSettingsRoutes: ServerRoute[] = [{
             options: {
                 allowUnknown: true,
                 security: [{ apiKey: [] }]
-            }
+            },
+            payload: Joi.object({
+                file: Joi.array().items(Joi.any().required()).min(1).required(),
+            })
         },
         auth: 'user',
         payload: {

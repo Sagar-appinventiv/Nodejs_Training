@@ -1,5 +1,6 @@
 import { ServerRoute } from '@hapi/hapi';
 import { LikeController } from '../controllers/like.controller';
+import Joi from 'joi';
 
 const likeRoutes: ServerRoute[] = [
     {
@@ -12,6 +13,9 @@ const likeRoutes: ServerRoute[] = [
             tags: ['api', 'User feed APIs'],
             description: 'Like API',
             validate:{
+                params: Joi.object({
+                    likedUserId: Joi.number().required(),
+                }),
                 options:{
                     allowUnknown:true,
                     security:[{ apiKey:[] }]
@@ -51,6 +55,9 @@ const likeRoutes: ServerRoute[] = [
             tags: ['api','User profile APIs'],
             description: 'Mark single notification as read',
             validate: {
+                params: Joi.object({
+                    notificationId: Joi.number().required(),
+                }),
                 options: {
                     allowUnknown:true,
                     security: [{ apiKey:[] }]
@@ -66,6 +73,9 @@ const likeRoutes: ServerRoute[] = [
             tags: ['api','User profile APIs'],
             description: 'Deleting the match',
             validate: {
+                params: Joi.object({
+                    matchId: Joi.number().required(),
+                }),
                 options: {
                     allowUnknown: true,
                     security: [{ apiKey: []}]

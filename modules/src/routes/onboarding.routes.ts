@@ -40,10 +40,10 @@ const onboardingRoutes: ServerRoute[] = [
             notes
             : 'This API allows users to Login ',
             validate: {
-                // payload: Joi.object({
-                //     email: Joi.string().pattern(emailRegex).required(),
-                //     password: Joi.string().pattern(passwordRegex).required(),
-                // }),
+                payload: Joi.object({
+                    email: Joi.string().pattern(emailRegex).required(),
+                    password: Joi.string().pattern(passwordRegex).required(),
+                }),
                 options: {
                     allowUnknown:true,
                     security: [{ apiKey:[] }]

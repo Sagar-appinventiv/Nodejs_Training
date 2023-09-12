@@ -59,6 +59,9 @@ const userProfileRoutes: ServerRoute[] = [
                     allowUnknown: true,
                     security: [{ apiKey: [] }],
                 },
+                params: Joi.object({
+                    userId: Joi.number().required(),
+                })
             },
             auth: 'user',
         },
