@@ -1,33 +1,3 @@
-// import { ServerRoute } from '@hapi/hapi';
-// import { LikeController } from '../controllers/like.controller';
-
-// const likeRoutes: ServerRoute[] = [
-//     {
-//         method: 'POST',
-//         path: '/like/{likedUserId}',
-//         handler: (request,h) => {
-//             return LikeController.likeUser(request,h);
-//         },
-//         options: {
-//             auth: 'user',
-//         },
-//     },
-
-//     {
-//         method:'POST',
-//         path: '/notifications/mark-all-read',
-//         handler: LikeController.markAllNotificationsAsRead
-//     },
-
-//     {
-//         method:'POST',
-//         path:'/notifications/{notificationId}/mark-read',
-//         handler: LikeController.markSingleNotificationAsRead
-//     }
-// ];
-
-// export default likeRoutes;
-
 import { ServerRoute } from '@hapi/hapi';
 import { LikeController } from '../controllers/like.controller';
 
@@ -60,7 +30,7 @@ const likeRoutes: ServerRoute[] = [
         options: {
             auth: 'user',
             tags: ['api','User profile APIs'],
-            description: 'Mark all notifications as read API',
+            description: 'Mark all notifications as read',
             validate: {
                 options:{
                     allowUnknown: true,
@@ -79,7 +49,7 @@ const likeRoutes: ServerRoute[] = [
         options:{
             auth: 'user',
             tags: ['api','User profile APIs'],
-            description: 'Mark single notification as read API',
+            description: 'Mark single notification as read',
             validate: {
                 options: {
                     allowUnknown:true,
@@ -93,6 +63,14 @@ const likeRoutes: ServerRoute[] = [
         path: '/deleteMatch/{matchId}',
         handler: LikeController.deleteMatch,
         options: {
+            tags: ['api','User profile APIs'],
+            description: 'Deleting the match',
+            validate: {
+                options: {
+                    allowUnknown: true,
+                    security: [{ apiKey: []}]
+                }
+            },
             auth: 'user'
         }
       },

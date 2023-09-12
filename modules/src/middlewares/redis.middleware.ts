@@ -1,6 +1,6 @@
 import * as redis from "redis";
 
-let client:any;
+let client: any;
 
 (async function () {
     client = await redis.createClient();
@@ -14,7 +14,7 @@ let client:any;
 
 
 export class Redis {
-    static async maintain_redisSession(isUser:any) {
+    static async maintain_redisSession(isUser: any) {
         try {
             await client.SET(isUser.email, JSON.stringify({
                 user_id: isUser.id,
@@ -27,7 +27,7 @@ export class Redis {
         }
     }
 
-    static async logout_redisSession(isUser:any) {
+    static async logout_redisSession(isUser: any) {
         try {
             await client.SET(isUser.email, JSON.stringify({
                 user_id: isUser.id,

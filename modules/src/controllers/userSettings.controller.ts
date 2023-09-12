@@ -1,16 +1,10 @@
 import { User } from "../models/user.model";
 import { Request, ResponseToolkit } from '@hapi/hapi';
 import bcrypt from 'bcrypt';
-import { Redis } from '../middlewares/redis.middleware';
-import nodemailer from 'nodemailer';
-import { Sessions } from '../middlewares/session.middleware';
-import { Session } from '../models/session.model';
-import multer from 'multer';
-import path from 'path';
 import fs from 'fs';
-import { promisify } from 'util';
 import { ArchivedUser } from "../models/archivedUser.model";
-import JSONTransport from "nodemailer/lib/json-transport";
+import { UserE } from "../entities/user.entity";
+import { SessionE } from "../entities/session.entity";
 
 export class UserSettingsController {
 
@@ -25,10 +19,8 @@ export class UserSettingsController {
                 newPassword: string;
             };
 
-            const isUser = await User.findOne({ where: { email: user.email } });
-
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
-            console.log(isActive);
+            const isUser = await UserE.ifEmailExists(user.email);
+            const isActive = await SessionE.ifSessionExists(isUser.id);
             if (!isActive.status) {
                 return h.response({ status: "!!! User is inactive !!!" });
             }
@@ -59,9 +51,9 @@ export class UserSettingsController {
         try {
             const user: any = request.auth.credentials;
             // console.log(user);
-            const isUser = await User.findOne({ where: { email: user.email } });
+            const isUser = await UserE.ifEmailExists(user.email);
             // console.log('----isUser--------',isUser);
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isActive = await SessionE.ifSessionExists(isUser.id);
             // console.log('--------isActive--------',isActive);
             if (isActive.status) {
                 const existingUser = await ArchivedUser.findOne({ where: { email: isUser.email } });
@@ -94,9 +86,8 @@ export class UserSettingsController {
                         dateOfBirth: isUser.dateOfBirth
                     })
                 }
-                await Session.destroy({ where: { userId: isUser.id } });
+                await SessionE.DeleteSession(isUser.id);
                 await isUser.destroy();
-                // console.log(isUser);
                 return h.response({ message: "------- Account deleted successfully -------" }).code(200);
             }
             else {
@@ -114,8 +105,8 @@ export class UserSettingsController {
     static async setProfilePicture(request: any, h: ResponseToolkit) {
         try {
             const user = request.auth.credentials;
-            const isUser = await User.findOne({ where: { email: user.email } });
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isUser = await UserE.ifEmailExists(user.email);
+            const isActive = await SessionE.ifSessionExists(isUser.id);
             if (!isActive.status) {
                 return h.response({ status: "!!! User is inactive !!!" });
             }
@@ -137,9 +128,7 @@ export class UserSettingsController {
                 return new Promise((resolve, reject) => {
                     file.on('finish', async () => {
                         try {
-                            await User.update({ profilePicture: name }, {
-                                where: { email: isUser.email }
-                            });
+                            await UserE.updateProfilePicture(isUser.id, name);
                             resolve(h.response({ message: "------- Profile picture uploaded successfully -------" }).code(200));
                         } catch (error) {
                             console.log("Error", error);
@@ -165,9 +154,9 @@ export class UserSettingsController {
     static async setGalleryPhotos(request: any, h: any) {
         try {
             const user = request.auth.credentials;
-            const isUser = await User.findOne({ where: { email: user.email } });
+            const isUser = await UserE.ifEmailExists(user.email);
 
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isActive = await SessionE.ifSessionExists(isUser.id);
             if (!isActive.status) {
                 return h.response({ status: "!!! User is inactive !!!" });
             }
@@ -193,33 +182,13 @@ export class UserSettingsController {
                     const file = fs.createWriteStream(path);
                     // console.log(file);
                     data.file[i].pipe(file);
-
-                    // file.on('finish', async () => {
-                    //     try {
-                    //         await User.update({ galleryPhotos: [name] }, {
-                    //             where: { email: isUser.email }
-                    //         });
-                    //         console.log("Success");
-                    //         // h.response({ message: "------- Profile picture uploaded successfully -------" }).code(200);
-                    //     } catch (error) {
-                    //         console.log("Error", error);
-                    //         // h.response({ message: "!!! Error updating profile picture !!!" }).code(500);
-                    //     }
-                    // });
-
-                    // file.on('error', (error) => {
-                    //     console.log(error);
-                    //     // h.response({ message: "!!! Error writing file !!!" }).code(500);
-                    // });
                 }
 
-                try{
-                    await User.update({ galleryPhotos: name }, {
-                                    where: { email: isUser.email }
-                                });
-                    return h.response({message: "success"});
+                try {
+                    await UserE.updateGallery(isUser.id,name);
+                    return h.response({ message: "success" });
                 }
-                catch(err){
+                catch (err) {
                     console.log(err);
                     return h.response("error");
                 }

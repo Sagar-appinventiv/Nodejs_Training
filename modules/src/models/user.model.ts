@@ -20,10 +20,6 @@ const User = sequelize.define('user', {
         type: Sequelize.STRING,
         allowNull: false
     },
-    // stripeCustomerId: {
-    //     type: Sequelize.STRING,
-    //     allowNull: false
-    // },
     verifiedUser: {
         type: Sequelize.BOOLEAN,
         allowNull: true,
@@ -63,7 +59,8 @@ const User = sequelize.define('user', {
         allowNull: true,
     },
     // notifications: {
-    //     type: Sequelize.ARRAY(Sequelize.JSONB),
+    //     type: Sequelize.ARRAY(Sequelize.STRING),
+    //     allowNull: true,
     //     defaultValue: [],
     // },
     galleryPhotos: {

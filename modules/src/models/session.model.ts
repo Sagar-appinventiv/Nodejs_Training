@@ -1,7 +1,6 @@
 import Sequelize from "sequelize";
 import { sequelize } from "../database/dbConnection";
 
-
 const Session = sequelize.define('session', {
     id: {
         type: Sequelize.INTEGER,

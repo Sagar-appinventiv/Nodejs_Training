@@ -98,7 +98,7 @@ const onboardingRoutes: ServerRoute[] = [
     },
 
     {
-        method: "GET",
+        method: "POST",
         path: "/logout",
         options: {
             tags: ['api','User onboading APIs'],

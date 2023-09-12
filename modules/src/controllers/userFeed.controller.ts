@@ -1,8 +1,8 @@
 import { Request, ResponseToolkit } from '@hapi/hapi';
-import { User } from '../models/user.model';
 import { Op } from 'sequelize';
-import { Session } from '../models/session.model';
-import { sequelize } from '../database/dbConnection';
+import { UserE } from '../entities/user.entity';
+import { SessionE } from '../entities/session.entity';
+import { LikeE } from '../entities/like.entity';
 
 
 export class UserFeedController {
@@ -12,12 +12,13 @@ export class UserFeedController {
     static async searchUsers(request: Request, h: ResponseToolkit) {
         try {
             const user: any = request.auth.credentials;
-            const isUser = await User.findOne({ where: { email: user.email } });
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isUser = await UserE.ifEmailExists(user.email)
+            const isActive = await SessionE.ifSessionExists(isUser.id);
+            console.log(">>>>>>>>><<<<<<<<", isActive);
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' })
             }
-            
+
             const { interestedIn, areaLocality, ageGroup, hobbies } = request.query as {
                 interestedIn: string;
                 areaLocality: string;
@@ -52,13 +53,12 @@ export class UserFeedController {
             }
 
             const blockedUserIds = isUser.blockedUsers || [];
-            filters.id = { [Op.notIn]: blockedUserIds };
+            const likedUserIds = await LikeE.findLikedUserIdsByLikerId(isUser.id)
+            const likedIds = likedUserIds.map((like: any) => like.likedUserId);
+
+            filters.id = { [Op.notIn]: [...blockedUserIds, ...likedIds] };
             console.log(filters)
-            let users = await User.findAll({
-                where: filters,
-                attributes: ['fullName', 'profilePicture', 'areaLocality', [sequelize.fn('DATE_PART', 'year', sequelize.fn('age', sequelize.col('dateOfBirth'))), 'age'], 'hobbies'
-                ],
-            });
+            let users = await UserE.findUsersBasedOnFilters(filters);
 
             if (hobbies) {
                 const userHobbies = Array.isArray(hobbies) ? hobbies : [hobbies];
@@ -81,9 +81,9 @@ export class UserFeedController {
     static async blockUser(request: Request, h: ResponseToolkit) {
         try {
             const user: any = request.auth.credentials;
-            const isUser = await User.findOne({ where: { email: user.email } });
+            const isUser = await UserE.ifEmailExists(user.email);
 
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isActive = await SessionE.ifSessionExists(isUser.id)
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' })
             }
@@ -91,13 +91,7 @@ export class UserFeedController {
                 return h.response({ status: '!!! User is not verified !!!' }).code(403);
             }
             const blockedUserId = request.params.blockedUserId;
-            await sequelize.query(
-                `UPDATE "users" SET "blockedUsers" = array_append("blockedUsers", :blockedUserId) WHERE "id" = :userId`,
-                {
-                    replacements: { blockedUserId, userId: isUser.id },
-                    type: sequelize.QueryTypes.UPDATE,
-                }
-            );
+            await UserE.addToBlockUsersList(isUser.id, blockedUserId)
 
             return h.response({ status: '------- User blocked successfully -------' }).code(200);
         } catch (error) {
@@ -114,9 +108,9 @@ export class UserFeedController {
     static async removeBlockedUser(request: Request, h: ResponseToolkit) {
         try {
             const user: any = request.auth.credentials;
-            const isUser = await User.findOne({ where: { email: user.email } });
+            const isUser = await UserE.ifEmailExists(user.email);
 
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isActive = await SessionE.ifSessionExists(isUser.id)
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' });
             }
@@ -125,19 +119,11 @@ export class UserFeedController {
             }
             const userIdToRemove = request.params.userId;
 
-            const userToRemove = await User.findByPk(userIdToRemove);
+            const [rowsUpdated] = await UserE.removeFromBlockedUsersList(isUser.id, userIdToRemove);
 
-            if (!userToRemove) {
-                return h.response({ status: '!!! User not found !!!' }).code(404);
+            if (rowsUpdated === 0) {
+                return h.response({ status: '!!! User not found or not in the blocked users list !!!' }).code(404);
             }
-
-            await sequelize.query(
-                `UPDATE "users" SET "blockedUsers" = array_remove("blockedUsers", :userIdToRemove) WHERE "id" = :userId`,
-                {
-                    replacements: { userIdToRemove, userId: isUser.id },
-                    type: sequelize.QueryTypes.UPDATE,
-                }
-            );
 
             return h.response({ status: '------- User unblocked successfully -------' }).code(200);
         } catch (error) {

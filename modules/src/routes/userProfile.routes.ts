@@ -4,7 +4,7 @@ import Joi from 'joi';
 
 const userProfileRoutes: ServerRoute[] = [
     {
-        method: 'POST',
+        method: 'PUT',
         path: '/update-details',
         handler: UserProfileController.updateUserDetails,
         options: {
@@ -20,7 +20,7 @@ const userProfileRoutes: ServerRoute[] = [
                 payload: Joi.object({
                     interestedIn: Joi.string().valid('men', 'women').required(),
                     areaLocality: Joi.string().required(),
-                    // hobbies: Joi.array().items(Joi.string()).required(),
+                    hobbies: Joi.array().items(Joi.string()).required(),
                     mobileNo: Joi.string().required(),
                     dateOfBirth: Joi.string().isoDate().required(),
                     gender: Joi.string().valid('male', 'female').required(),

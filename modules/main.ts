@@ -13,11 +13,6 @@ import stripeWebhookRoutes from './src/routes/StripeWebhook.routes';
 import { ViewRoute } from './src/routes/view.routes';
 import likeRoutes from './src/routes/like.routes';
 import path from "path";
-import { sequelize } from './src/database/dbConnection';
-import jwt from 'jsonwebtoken';
-
-import { Server } from 'socket.io';
-import { Like } from './src/models/like.model';
 import { syncModelsSequentially } from './src/models/index.models';
 
 dotenv.config();

@@ -48,7 +48,14 @@ const userFeedRoutes: ServerRoute[] = [
         method: 'DELETE',
         path: '/removeBlockedUser/{userId}',
         handler: UserFeedController.removeBlockedUser,
-        options: {
+        options: { tags: ['api','User feed APIs'],
+        description: 'Deleting user from blocked list',
+        validate: {
+            options: {
+                allowUnknown: true,
+                security: [{ apiKey: [] }],
+            }
+        },
             auth:'user'
         }
     }

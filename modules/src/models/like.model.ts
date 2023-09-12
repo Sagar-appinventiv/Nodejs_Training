@@ -1,8 +1,7 @@
 import Sequelize from 'sequelize';
 import { sequelize } from '../database/dbConnection';
-import { User } from './user.model';
 
-const Like =  sequelize.define('like',{
+const Like = sequelize.define('like', {
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -45,7 +44,7 @@ Like.findMatchesForUser = async function (userId: any) {
 
     return matches;
 };
-Like.isMatch = async function (likerId:any, likedUserId:any) {
+Like.isMatch = async function (likerId: any, likedUserId: any) {
     if (!likerId || !likedUserId) {
         return false; // Return false if either value is undefined
     }

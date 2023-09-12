@@ -1,9 +1,10 @@
 import { Request, ResponseToolkit } from '@hapi/hapi';
-import { Like } from '../models/like.model';
 import { User } from '../models/user.model';
-import { Notification } from '../models/notification.model';
-import { Session } from '../models/session.model';
-import { Sequelize, Op } from 'sequelize';
+import { Sequelize } from 'sequelize';
+import { SessionE } from '../entities/session.entity';
+import { UserE } from '../entities/user.entity';
+import { LikeE } from '../entities/like.entity';
+import { NotificationE } from '../entities/notification.entity';
 
 interface Match {
     matchId: number;
@@ -17,8 +18,8 @@ export class LikeController {
     static async likeUser(request: Request, h: ResponseToolkit) {
         try {
             const user: any = request.auth.credentials;
-            const isUser = await User.findOne({ where: { email: user.email } });
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isUser = await UserE.ifEmailExists(user.email);
+            const isActive = await SessionE.ifSessionExists(isUser.id)
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' })
             }
@@ -31,51 +32,33 @@ export class LikeController {
             if (!likedUser) {
                 return h.response({ status: '!!! Liked user not found !!!' }).code(404);
             }
-            const existingLike = await Like.findOne({
-                where: {
-                    likerId: isUser.id,
-                    likedUserId: likedUserId,
-                },
-            });
+            const existingLike = await LikeE.ifExistingLike(isUser.id, likedUserId);
             if (existingLike) {
                 return h.response({ status: '------- You already liked this user -------' }).code(400);
             }
-            if (likedUserId !== isUser.id) {
-                await Like.create({ likerId: isUser.id, likedUserId });
-                const notificationMessage = `------- ${isUser.fullName}, has a crush on you. -------`;
-                const newNotification = await Notification.create({
-                    userId: likedUserId,
-                    senderId: isUser.id,
-                    type: 'like',
-                    message: notificationMessage,
-                });
-            }
-            const mutualLike = await Like.findOne({
-                where: {
-                    likerId: likedUserId,
-                    likedUserId: isUser.id,
-                },
-            });
 
-            if (mutualLike) {
-                const matchId = Math.floor(1000 + Math.random() * 9000);
-                await User.update(
-                    {
-                        matches: Sequelize.literal(`array_append(matches, '{"matchId": ${matchId}, "userIds": [${isUser.id}, ${likedUserId}]}'::jsonb)`),
-                    },
-                    {
-                        where: {
-                            id: [isUser.id, likedUserId],
+            console.log('>>>>>>>>>>>>>',existingLike);
+            if (likedUserId !== isUser.id) {
+                await LikeE.createLike(isUser.id, likedUserId);
+                const mutualLike = await LikeE.mutualLike(likedUserId, isUser.id);
+                if (mutualLike) {
+                    const matchId = Math.floor(1000 + Math.random() * 9000);
+                    await User.update(
+                        {
+                            matches: Sequelize.literal(`array_append(matches, '{"matchId": ${matchId}, "userIds": [${isUser.id}, ${likedUserId}]}'::jsonb)`),
                         },
-                    }
-                );
-                const matchMessage = `------- Congratulations, you got a new match, ${isUser.fullName} -------`;
-                await Notification.create({
-                    userId: likedUserId,
-                    senderId: isUser.id,
-                    type: 'match',
-                    message: matchMessage,
-                });
+                        {
+                            where: {
+                                id: [isUser.id, likedUserId],
+                            },
+                        }
+                    );
+                    const matchMessage = `------- Congratulations, you got a new match, ${isUser.fullName} -------`;
+                    await NotificationE.createMatchNotification(likedUserId, isUser.id, matchMessage);
+                } else {
+                    const notificationMessage = `------- ${isUser.fullName}, has a crush on you. -------`;
+                    await NotificationE.createLikeNotification(likedUserId, isUser.id, notificationMessage);
+                }
             }
 
             return h.response({ status: '------- Liked user successfully -------' }).code(200);
@@ -91,18 +74,13 @@ export class LikeController {
     static async markSingleNotificationAsRead(request: Request, h: ResponseToolkit) {
         try {
             const isUser: any = request.auth.credentials;
-            const user = await User.findOne({ where: { email: isUser.email } });
-            const isActive = await Session.findOne({ where: { userId: user.id } });
+            const user = await UserE.ifEmailExists(isUser.email);
+            const isActive = await SessionE.ifSessionExists(user.id);
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' })
             }
             const notificationId = request.params.notificationId;
-            const notification = await Notification.findOne({
-                where: {
-                    id: notificationId,
-                    userId: user.id
-                }
-            });
+            const notification = await NotificationE.findNotification(notificationId, user.id);
 
             if (!notification) {
                 return h.response({ status: '!!! Notification not found !!!' }).code(404);
@@ -128,15 +106,12 @@ export class LikeController {
     static async markAllNotificationsAsRead(request: Request, h: ResponseToolkit) {
         try {
             const isUser: any = request.auth.credentials;
-            const user = await User.findOne({ where: { email: isUser.email } })
-            const isActive = await Session.findOne({ where: { userId: user.id } });
+            const user = await UserE.ifEmailExists(isUser.email);
+            const isActive = await SessionE.ifSessionExists(user.id)
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' })
             }
-            await Notification.update(
-                { isRead: true },
-                { where: { userId: user.id, isRead: false } }
-            );
+            await NotificationE.readAllNotification(user.id);
 
             return h.response({ status: '------- All notifications marked as read -------' }).code(200);
         } catch (error) {
@@ -146,15 +121,15 @@ export class LikeController {
     }
 
     /***************************************************/
-    /**************** Delete Match API ******************/
+    /**************** Delete Match API *****************/
     /***************************************************/
 
     static async deleteMatch(request: Request, h: ResponseToolkit) {
         try {
             const user: any = request.auth.credentials;
-            const isUser = await User.findOne({ where: { email: user.email } });
+            const isUser = await UserE.ifEmailExists(user.email);
 
-            const isActive = await Session.findOne({ where: { userId: isUser.id } });
+            const isActive = await SessionE.ifSessionExists(isUser.id)
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' });
             }
@@ -176,20 +151,10 @@ export class LikeController {
                 userIdToDelete = matchToDelete.userIds.find((userId: number) => userId !== isUser.id);
 
                 // Delete like data for the current user
-                await Like.destroy({
-                    where: {
-                        likerId: isUser.id,
-                        likedUserId: userIdToDelete,
-                    },
-                });
+                await LikeE.deleteLike(isUser.id, userIdToDelete);
 
                 // Delete like data for the liked user
-                await Like.destroy({
-                    where: {
-                        likerId: userIdToDelete,
-                        likedUserId: isUser.id,
-                    },
-                });
+                await LikeE.deleteLike(userIdToDelete, isUser.id);
 
                 // Continue with deleting match data from user tables
                 // const updatedMatches = isUser.matches.filter((match: Match) => match.matchId !== parseInt(matchIdToDelete));
