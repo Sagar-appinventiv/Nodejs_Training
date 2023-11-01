@@ -44,7 +44,7 @@ export const ViewRoute = [
         path: "/profile",
         handler: async (request: any, h: any) => {
             const isUser = JSON.parse(request.query.isUser);
-            return h.view('profile', {user: isUser});
+            return h.view('profile', { user: isUser });
 
         }
     },

@@ -1,6 +1,7 @@
 import { ServerRoute } from '@hapi/hapi';
 import { LikeController } from '../controllers/like.controller';
 import Joi from 'joi';
+import { Like } from '../models/like.model';
 
 const likeRoutes: ServerRoute[] = [
     {
@@ -12,13 +13,13 @@ const likeRoutes: ServerRoute[] = [
         options: {
             tags: ['api', 'User feed APIs'],
             description: 'Like API',
-            validate:{
+            validate: {
                 params: Joi.object({
                     likedUserId: Joi.number().required(),
                 }),
-                options:{
-                    allowUnknown:true,
-                    security:[{ apiKey:[] }]
+                options: {
+                    allowUnknown: true,
+                    security: [{ apiKey: [] }]
                 }
             },
             auth: 'user',
@@ -26,41 +27,41 @@ const likeRoutes: ServerRoute[] = [
     },
 
     {
-        method:'POST',
+        method: 'POST',
         path: '/notifications/mark-all-read',
         handler: async (request, h) => {
             return await LikeController.markAllNotificationsAsRead(request, h);
         },
         options: {
             auth: 'user',
-            tags: ['api','User profile APIs'],
+            tags: ['api', 'User profile APIs'],
             description: 'Mark all notifications as read',
             validate: {
-                options:{
+                options: {
                     allowUnknown: true,
-                    security: [{ apiKey:[] }]
+                    security: [{ apiKey: [] }]
                 }
             }
         }
     },
 
     {
-        method:'POST',
-        path:'/notifications/{notificationId}/mark-read',
+        method: 'POST',
+        path: '/notifications/{notificationId}/mark-read',
         handler: async (request, h) => {
             return await LikeController.markSingleNotificationAsRead(request, h);
         },
-        options:{
+        options: {
             auth: 'user',
-            tags: ['api','User profile APIs'],
+            tags: ['api', 'User profile APIs'],
             description: 'Mark single notification as read',
             validate: {
                 params: Joi.object({
                     notificationId: Joi.number().required(),
                 }),
                 options: {
-                    allowUnknown:true,
-                    security: [{ apiKey:[] }]
+                    allowUnknown: true,
+                    security: [{ apiKey: [] }]
                 }
             }
         }
@@ -70,7 +71,7 @@ const likeRoutes: ServerRoute[] = [
         path: '/deleteMatch/{matchId}',
         handler: LikeController.deleteMatch,
         options: {
-            tags: ['api','User profile APIs'],
+            tags: ['api', 'User profile APIs'],
             description: 'Deleting the match',
             validate: {
                 params: Joi.object({
@@ -78,12 +79,30 @@ const likeRoutes: ServerRoute[] = [
                 }),
                 options: {
                     allowUnknown: true,
-                    security: [{ apiKey: []}]
+                    security: [{ apiKey: [] }]
                 }
             },
             auth: 'user'
         }
-      },
+    },
+
+    {
+        method: 'POST',
+        path: '/api/chats/{recieverId}',
+        handler: LikeController.sendMessage,
+        options: {
+            auth: 'user'
+        }
+    },
+
+    {
+        method: 'GET',
+        path: '/api/chats/{recieverId}',
+        handler: LikeController.getMessages,
+        options: {
+            auth: 'user'
+        }
+    }
 ];
 
 export default likeRoutes;

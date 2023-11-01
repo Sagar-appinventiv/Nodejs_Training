@@ -130,7 +130,7 @@ export class UserProfileController {
             const premiumPlan = process.env.PREMIUM_PLAN_ID!;
 
             const session = await stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
+                payment_method_types: ['card'], 
                 line_items: [{
                     price: premiumPlan,
                     quantity: 1,

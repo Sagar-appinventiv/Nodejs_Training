@@ -45,17 +45,16 @@ const init = async () => {
             security: [{ apiKey: [] }],
             grouping: 'tags',
             tags: [
-                { name: 'User onboading APIs'},
-                { name: 'User profile APIs'},
-                { name: 'Payment related APIs'},
-                { name: 'User feed APIs'},
-                { name: 'User settings APIs'},
-
-
+                { name: 'User onboading APIs' },
+                { name: 'User profile APIs' },
+                { name: 'Payment related APIs' },
+                { name: 'User feed APIs' },
+                { name: 'User settings APIs' },
             ],
         }
     },
     ])
+
 
     server.views({
         engines: {
@@ -87,64 +86,6 @@ const init = async () => {
             auth: false
         }
     });
-
-    // server.route({
-    //     method: 'GET',
-    //     path: '/private-chat',
-    //     handler: async (request, h) => {
-    //         const filePath = path.join(__dirname, '../private_chat.html');
-    //         return h.file(filePath);
-    //     },
-    //     options: {
-    //         auth: false,
-    //     },
-    // });
-
-    // const io = new Server(server.listener);
-
-    // io.on('connection', async (socket) => {
-    //     console.log(`User connected: ${socket.id}`);
-    //     socket.on('startPrivateChat', async (matchUserId) => {
-    //         try {
-    //             const token = socket.handshake.auth.token;
-    //             if (!token) {
-    //                 console.log('No token found in socket auth.');
-    //                 return;
-    //             }
-
-    //             const decodedToken = jwt.verify(token, process.env.SECRET_KEY!) as jwt.JwtPayload;
-    //             const userId = decodedToken.id;
-
-    //             const userMatches = await Like.findAll({
-    //                 where: { likerId: userId, likedUserId: matchUserId },
-    //                 attributes: ['likedUserId'],
-    //             });
-
-    //             if (userMatches.length > 0) {
-    //                 const roomId = `room_${userId}_${matchUserId}`;
-    //                 socket.join(roomId);
-    //                 console.log(`User ${userId} started a private chat with ${matchUserId}`);
-    //             } else {
-    //                 console.log(`User ${userId} does not have a match with ${matchUserId}`);
-    //             }
-    //         } catch (error) {
-    //             console.log("Error decoding token:", error);
-    //         }
-    //     });
-
-    //     socket.on('privateMessage', ({ roomId, message }) => {
-    //         io.to(roomId).emit('privateMessage', {
-    //             sender: socket.id,
-    //             message: message,
-    //         });
-    //         console.log(`Private message sent in room ${roomId}: ${message}`);
-    //     });
-
-    //     socket.on('disconnect', () => {
-    //         console.log(`User disconnected: ${socket.id}`);
-    //     });
-    // });
-
     await server.start();
 
     console.log(`Server running at: ${server.info.uri}`);

@@ -5,6 +5,10 @@ import { SessionE } from '../entities/session.entity';
 import { UserE } from '../entities/user.entity';
 import { LikeE } from '../entities/like.entity';
 import { NotificationE } from '../entities/notification.entity';
+import { ChatModel } from '../models/chat.model';
+import { Op } from 'sequelize';
+import { Match } from '../models/match.model';
+import { createApiLogger } from 'logging-colorify';
 
 interface Match {
     matchId: number;
@@ -17,6 +21,7 @@ export class LikeController {
     /***************************************************/
     static async likeUser(request: Request, h: ResponseToolkit) {
         try {
+            const stime = new Date();
             const user: any = request.auth.credentials;
             const isUser = await UserE.ifEmailExists(user.email);
             const isActive = await SessionE.ifSessionExists(isUser.id)
@@ -37,12 +42,16 @@ export class LikeController {
                 return h.response({ status: '------- You already liked this user -------' }).code(400);
             }
 
-            console.log('>>>>>>>>>>>>>',existingLike);
             if (likedUserId !== isUser.id) {
                 await LikeE.createLike(isUser.id, likedUserId);
                 const mutualLike = await LikeE.mutualLike(likedUserId, isUser.id);
+
                 if (mutualLike) {
                     const matchId = Math.floor(1000 + Math.random() * 9000);
+                    const match = await Match.create({
+                        userIds: [isUser.id, likedUserId],
+                        matchId: matchId,
+                    });
                     await User.update(
                         {
                             matches: Sequelize.literal(`array_append(matches, '{"matchId": ${matchId}, "userIds": [${isUser.id}, ${likedUserId}]}'::jsonb)`),
@@ -55,12 +64,14 @@ export class LikeController {
                     );
                     const matchMessage = `------- Congratulations, you got a new match, ${isUser.fullName} -------`;
                     await NotificationE.createMatchNotification(likedUserId, isUser.id, matchMessage);
+
                 } else {
                     const notificationMessage = `------- ${isUser.fullName}, has a crush on you. -------`;
                     await NotificationE.createLikeNotification(likedUserId, isUser.id, notificationMessage);
                 }
             }
 
+            await createApiLogger(request,stime);            
             return h.response({ status: '------- Liked user successfully -------' }).code(200);
         } catch (error) {
             console.error('Error liking user:', error);
@@ -145,15 +156,12 @@ export class LikeController {
 
             let userIdToDelete;
 
-            // // Delete match data from the Like model for both users first
 
             if (matchToDelete.userIds && matchToDelete.userIds.length === 2) {
                 userIdToDelete = matchToDelete.userIds.find((userId: number) => userId !== isUser.id);
 
-                // Delete like data for the current user
                 await LikeE.deleteLike(isUser.id, userIdToDelete);
 
-                // Delete like data for the liked user
                 await LikeE.deleteLike(userIdToDelete, isUser.id);
 
                 // Continue with deleting match data from user tables
@@ -184,7 +192,6 @@ export class LikeController {
                 }
             }
 
-            // Continue with deleting match data from the current user's matches array
             const updatedMatches = isUser.matches.filter((match: Match) => match.matchId !== parseInt(matchIdToDelete));
 
             await isUser.update({ matches: updatedMatches });
@@ -196,4 +203,84 @@ export class LikeController {
             return h.response({ status: '!!! Error deleting match !!!' }).code(500);
         }
     }
-}    
+
+    static async sendMessage(request: Request, h: ResponseToolkit) {
+        try {
+            const user: any = request.auth.credentials;
+            const isUser = await UserE.ifEmailExists(user.email);
+            const isActive = await SessionE.ifSessionExists(isUser.id)
+            if (!isActive.status) {
+                return h.response({ status: '!!! User is inactive !!!' });
+            }
+            const senderId = isUser.id;
+            const receiverId = request.params.recieverId;
+            if (senderId === receiverId) {
+                return h.response({ status: '!!! You cannot send message to self !!!' }).code(403);
+            }
+            const matchSender = await Match.findOne({
+                where: {
+                    userIds: [senderId, receiverId],
+                },
+            });
+
+            console.log('MatchIdSender', matchSender);
+
+            const matchReceiver = await Match.findOne({
+                where: {
+                    userIds: [receiverId, senderId],
+                },
+            });
+
+
+            console.log('MatchIdReciever', matchReceiver);
+            if (!matchSender && !matchReceiver) {
+                return h.response({ status: '!!! You can only chat with mutual matches !!!' }).code(403);
+            }
+
+            const { message } = request.payload as {
+                message: string;
+            };
+            const chat = await ChatModel.create({ senderId, receiverId, message });
+
+            return h.response(chat).code(201);
+        } catch (error) {
+            console.log("!!! Error Sending Message: ", error);
+            return h.response({ status: '!!! Error sending message !!!' }).code(500);
+        }
+    }
+
+    static async getMessages(request: Request, h: ResponseToolkit) {
+        try {
+            const user: any = request.auth.credentials;
+            const isUser = await UserE.ifEmailExists(user.email);
+            const isActive = await SessionE.ifSessionExists(isUser.id)
+            if (!isActive.status) {
+                return h.response({ status: '!!! User is inactive !!!' });
+            }
+            const senderId = isUser.id;
+            const receiverId = request.params.recieverId;
+            if (senderId === receiverId) {
+                return h.response({ status: '!!! Please enter id of a valid user !!!' }).code(403);
+            }
+
+            const messages = await ChatModel.findAll({
+                where: {
+                    [Op.or]: [{
+                        senderId, receiverId
+                    },
+                    {
+                        senderId: receiverId,
+                        recieverId: senderId
+                    },
+                    ],
+                },
+                order: [['createdAt', 'ASC']],
+            });
+            return h.response(messages).code(200);
+        } catch (error) {
+            console.error('Error getting messages:', error);
+            return h.response({ status: '!!! Error getting messages !!!' }).code(500);
+        }
+    }
+}
+

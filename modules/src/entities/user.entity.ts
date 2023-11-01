@@ -18,8 +18,8 @@ class UserEntity extends BaseEntity {
         return data;
     }
 
-    async createUser(name: any, email: any, password: any) {
-        let payload = { fullName: name, email: email, password: password }
+    async createUser(payload:any) {
+        // let payload = { fullName: name, email: email, password: password, mobileNo:mobileNo }
         let data = await this.create(payload)
         return data;
     }

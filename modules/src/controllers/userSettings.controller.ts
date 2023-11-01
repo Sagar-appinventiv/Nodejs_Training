@@ -31,9 +31,7 @@ export class UserSettingsController {
                 }
                 const salt = await bcrypt.genSalt(10);
                 const hashedPassword = await bcrypt.hash(newPassword, salt);
-                // user.password = hashedPassword;
-                // await user.save();
-                // await Sessions.update_session(user.id);
+               
                 const password = await User.update({ password: hashedPassword }, { where: { id: isUser.id } });
 
                 return h.response({ status: '------- Password updated successfully -------' });

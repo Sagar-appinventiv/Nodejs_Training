@@ -2,6 +2,11 @@ import  Sequelize  from 'sequelize';
 import { sequelize } from '../database/dbConnection';
 
 const ChatModel = sequelize.define('chat', {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     senderId: {
         type: Sequelize.INTEGER,
         references: {
@@ -10,7 +15,7 @@ const ChatModel = sequelize.define('chat', {
         },
         allowNull: false,
     },
-    recieverId: {
+    receiverId: {
         type: Sequelize.INTEGER,
         references: {
             model: 'users',
@@ -19,9 +24,13 @@ const ChatModel = sequelize.define('chat', {
         allowNull: false,
     },
     message: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: false,
     },
+    createdAt: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    }
 });
 
 export { ChatModel };

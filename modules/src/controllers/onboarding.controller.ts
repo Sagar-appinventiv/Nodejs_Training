@@ -1,5 +1,6 @@
 import { Request, ResponseToolkit } from '@hapi/hapi';
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 import bcrypt from 'bcrypt';
 import { Sessions } from "../middlewares/session.middleware";
 import { Redis } from '../middlewares/redis.middleware';
@@ -7,9 +8,26 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import { UserE } from "../entities/user.entity";
+import { UserOnboardingService } from '../services/onboarding.service';
+import { createApiLogger } from 'logging-colorify';
+import { User } from '../models/user.model';
+import path from 'path';
 
 dotenv.config();
 
+const client = new OAuth2Client({
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri: process.env.GOOGLE_REDIRECT_URL
+});
+
+async function getGoogleSignInUrl() {
+    const authUrl = client.generateAuthUrl({
+        access_type: "offline",
+        scope: ["profile", "email"],
+    });
+    return authUrl;
+}
 export class UserOnboardingController {
 
     /***************************************************/
@@ -17,29 +35,17 @@ export class UserOnboardingController {
     /***************************************************/
     static async signup(request: Request, h: ResponseToolkit) {
         try {
-            // await validateSignup.payload.validateAsync(request.payload, h);
-            const { fullName, email, password } = request.payload as {
+            let stime = new Date();
+            const payload = request.payload as {
                 fullName: string;
                 email: string;
                 password: string;
+                mobileNo: string
             }
-            const existingUser = await UserE.ifEmailExists(email);
-            if (existingUser) {
-                return h.response({ status: '!!! Email already exists !!!' }).code(409);
-            }
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
-
-            const newUser = await UserE.createUser(
-                fullName,
-                email,
-                hashedPassword
-            );
-
-            console.log(newUser);
-            await Redis.maintain_redisSession(newUser);
-            // return h.response({ status: '------- SignedUp successfully -------' }).code(201);
-            return h.redirect('/')
+            createApiLogger(request, stime);
+            const user = await UserOnboardingService.signup_service(payload);
+            // return h.redirect('/');
+            return h.response({ status: '------- SignedUp successfully -------' }).code(201);
         } catch (error) {
             console.error('!!! Server Error:', error);
             return h.response({ status: '!!! Server error !!!' }).code(500);
@@ -51,37 +57,24 @@ export class UserOnboardingController {
     /***************************************************/
     static async login(request: Request, h: ResponseToolkit) {
         try {
-            // validateLogin.payload.validateAsync(request.payload, h);
-
-            const { email, password } = request.payload as {
+            const Stime = new Date();
+            const payload = request.payload as {
                 email: string;
                 password: string;
             };
 
-            const user = await UserE.ifEmailExists(email);
-            if (!user) {
-                return h.response({ status: '!!! User not found !!!' }).code(404);
-            }
-
-            const hashedPassword = user.password;
-
-            if (!(await bcrypt.compare(password, hashedPassword))) {
-                return h.response({ status: '!!! Incorrect Password !!!' }).code(401);
-            }
-
-            const token = jwt.sign({ email }, process.env.SECRET_KEY!, { expiresIn: '2d' });
+            await UserOnboardingService.login_service(payload);
+            await createApiLogger(request, Stime);
+            const token = jwt.sign({ email: payload.email }, process.env.SECRET_KEY!, { expiresIn: '2d' });
             console.log(token);
-
-            await Redis.maintain_redisSession(user);
-            await Sessions.maintain_session(user);
             h.state('token', token, {
                 isHttpOnly: true
             });
-            // return h.response({ status: '------- Logged in successfully -------' });
-            return h.view('message')
+            return h.response({ status: '------- Logged in successfully -------' });
+            // return h.view('message')
 
-        } catch (error) {
-            return h.response({ status: '!!! Server error !!!' }).code(500);
+        } catch (error: any) {
+            return h.response({ status: error.message }).code(500);
         }
     }
 
@@ -99,9 +92,10 @@ export class UserOnboardingController {
             const logoutSuccessful = await Redis.logout_redisSession(isUser);
             if (logoutSuccessful) {
                 await Sessions.update_session(isUser.id);
-                // return h.response({ message: '------- User Logout Successfully -------' }).code(200);
                 h.unstate('token');
-                return h.view('login');
+                // return h.response({ message: '------- User Logout Successfully -------' }).code(200);
+
+                // return h.view('login');
             } else {
                 return h.response({ message: '!!! Session not found !!!' }).code(404);
             }
@@ -144,7 +138,7 @@ export class UserOnboardingController {
                 subject: 'Password Reset Request',
                 html: template.replace("{{ fullName }}", user.fullName).replace("{{ OTP }}", OTP),
             };
-
+            https://meet.google.com/cwd-ebmr-hxa?pli=1https://meet.google.chttps://meet.google.com/cwd-ebmr-hxa?pli=1https://meet.google.com/cwd-ebmr-hxa?pli=1https://meet.google.com/cwd-ebmr-hxa?pli=1om/cwd-ebmr-hxa?pli=1
             await transporter.sendMail(mailOptions);
 
             // console.log('Email sent: ' + info.response);
@@ -185,6 +179,63 @@ export class UserOnboardingController {
             return h.response({ message: '------- Password reset successfully -------' }).code(200);
         } catch (error) {
             return h.response({ message: '!!! Server error !!!' }).code(500);
+        }
+    }
+
+    /***************************************************/
+    /******************* Google SignIn *****************/
+    /***************************************************/
+
+    static async handleGoogleSignIn(request: Request, h: ResponseToolkit) {
+        try {
+            console.log("Query parameters:", request.query);
+            const tokenId:any = request.query.code as string;
+            console.log("tokenId:", tokenId);        
+            if (!tokenId) {
+            return h.response({ message: 'Invalid or missing token' }).code(400);
+        }
+        const { tokens } = await client.getToken(tokenId);
+        console.log("Tokens: ", tokens);
+            const ticket = await client.verifyIdToken({
+                idToken: tokens.id_token as string,
+                audience: process.env.GOOGLE_CLIENT_ID
+            });
+            const payload = ticket.getPayload();
+            if (payload) {
+                const user = await User.create({
+                    fullName: payload.name,
+                    password: '00000',
+                    email: payload.email
+                })
+                client.revokeToken(tokens.access_token as string);
+
+                if (user) {
+                    let token = jwt.sign({ email: user.email, id: user.id }, process.env.SECRET_KEY!, { expiresIn: '1h' });
+
+                    return h.response({ message: 'SignUp successfull', User: user, token }).code(201);
+                } else {
+                    return h.response({ message: "Signup can't happen" }).code(500);
+                }
+            } else {
+                return h.response({ message: 'Invalid Google payload' }).code(400);
+            }
+        } catch (error) {
+            console.error('Google Signup Error:', error);
+            return h.response({ message: 'Error signing up with Google' }).code(500);
+        }
+    }
+
+    static async googleSignIn(request: Request, h: ResponseToolkit) {
+        try {
+            const htmlPath = fs.readFileSync(
+            path.join(process.cwd(), 'view', 'googleSignIn.html'), 'utf-8');
+            const url = await getGoogleSignInUrl();
+            console.log(url)
+            const data = htmlPath.replace('{{name}}', url);
+            return h.response(data);
+        } catch (error) {
+            console.error('Google Signup Error:', error);
+            return h.response({ message: 'Error signing up with Google' }).code(500);
         }
     }
 }

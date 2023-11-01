@@ -46,7 +46,7 @@ Like.findMatchesForUser = async function (userId: any) {
 };
 Like.isMatch = async function (likerId: any, likedUserId: any) {
     if (!likerId || !likedUserId) {
-        return false; // Return false if either value is undefined
+        return false; 
     }
     const matchCount = await Like.count({
         where: {

@@ -11,22 +11,22 @@ const onboardingRoutes: ServerRoute[] = [
         path: "/signup",
         handler: UserOnboardingController.signup,
         options: {
-            tags: ['api','User onboading APIs'],
+            tags: ['api', 'User onboading APIs'],
             description: 'User SignUp API',
             notes: 'This API allows users to sign up',
             validate: {
-                payload : Joi.object({
+                payload: Joi.object({
                     fullName: Joi.string().required(),
-                    email:Joi.string().pattern(emailRegex).required(),
+                    email: Joi.string().pattern(emailRegex).required(),
                     password: Joi.string().pattern(passwordRegex).required(),
                 }),
                 options: {
-                    allowUnknown:true,
-                    security: [{ apiKey:[] }]
+                    allowUnknown: true,
+                    security: [{ apiKey: [] }]
                 }
             },
-        
-            auth:false,
+
+            auth: false,
         },
     },
 
@@ -35,21 +35,21 @@ const onboardingRoutes: ServerRoute[] = [
         path: "/login",
         handler: UserOnboardingController.login,
         options: {
-            tags: ['api','User onboading APIs'],
+            tags: ['api', 'User onboading APIs'],
             description: 'Login API',
             notes
-            : 'This API allows users to Login ',
+                : 'This API allows users to Login ',
             validate: {
                 payload: Joi.object({
                     email: Joi.string().pattern(emailRegex).required(),
                     password: Joi.string().pattern(passwordRegex).required(),
                 }),
                 options: {
-                    allowUnknown:true,
-                    security: [{ apiKey:[] }]
+                    allowUnknown: true,
+                    security: [{ apiKey: [] }]
                 }
             },
-            auth:false,
+            auth: false,
         },
     },
 
@@ -58,7 +58,7 @@ const onboardingRoutes: ServerRoute[] = [
         path: "/forgot-password",
         handler: UserOnboardingController.forgot_password,
         options: {
-            tags: ['api','User onboading APIs'],
+            tags: ['api', 'User onboading APIs'],
             description: 'Forgot Password API',
             notes: 'This API will send an OTP to user email',
             validate: {
@@ -66,11 +66,11 @@ const onboardingRoutes: ServerRoute[] = [
                     email: Joi.string().pattern(emailRegex).required(),
                 }),
                 options: {
-                    allowUnknown:true,
-                    security: [{ apiKey:[] }]
+                    allowUnknown: true,
+                    security: [{ apiKey: [] }]
                 }
             },
-            auth:false,
+            auth: false,
         },
     },
 
@@ -79,7 +79,7 @@ const onboardingRoutes: ServerRoute[] = [
         path: "/reset-password",
         handler: UserOnboardingController.reset_password,
         options: {
-            tags: ['api','User onboading APIs'],
+            tags: ['api', 'User onboading APIs'],
             description: 'Reset Password API',
             notes: 'This API allows users to reset their password',
             validate: {
@@ -89,11 +89,11 @@ const onboardingRoutes: ServerRoute[] = [
                     newPassword: Joi.string().pattern(passwordRegex).required(),
                 }),
                 options: {
-                    allowUnknown:true,
-                    security: [{ apiKey:[] }]
+                    allowUnknown: true,
+                    security: [{ apiKey: [] }]
                 }
             },
-            auth:false,
+            auth: false,
         },
     },
 
@@ -101,20 +101,32 @@ const onboardingRoutes: ServerRoute[] = [
         method: "POST",
         path: "/logout",
         options: {
-            tags: ['api','User onboading APIs'],
+            tags: ['api', 'User onboading APIs'],
             description: 'LogOut API',
-            validate:{
+            validate: {
                 options: {
-                    allowUnknown:true,
-                    security: [{ apiKey:[] }]
+                    allowUnknown: true,
+                    security: [{ apiKey: [] }]
                 }
             },
             auth: "user",
         },
-        handler: (request:any,h) => {
-            const {user} = request;
-            return UserOnboardingController.logout(request,user,h);
+        handler: (request: any, h) => {
+            const { user } = request;
+            return UserOnboardingController.logout(request, user, h);
         }
+    },
+
+    {
+        method: "GET",
+        path: "/google/signin",
+        handler: UserOnboardingController.handleGoogleSignIn
+    },
+    
+    {
+        method: "GET",
+        path: "/home",
+        handler: UserOnboardingController.googleSignIn
     },
 
 ];

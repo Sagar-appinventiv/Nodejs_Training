@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 import { UserE } from '../entities/user.entity';
 import { SessionE } from '../entities/session.entity';
 import { LikeE } from '../entities/like.entity';
+import { createApiLogger } from 'logging-colorify';
 
 
 export class UserFeedController {
@@ -11,19 +12,21 @@ export class UserFeedController {
     /***************************************************/
     static async searchUsers(request: Request, h: ResponseToolkit) {
         try {
+            const stime = new Date();
             const user: any = request.auth.credentials;
             const isUser = await UserE.ifEmailExists(user.email)
             const isActive = await SessionE.ifSessionExists(isUser.id);
-            console.log(">>>>>>>>><<<<<<<<", isActive);
             if (!isActive.status) {
                 return h.response({ status: '!!! User is inactive !!!' })
             }
 
-            const { interestedIn, areaLocality, ageGroup, hobbies } = request.query as {
+            const { interestedIn, areaLocality, ageGroup, hobbies, page, perPage } = request.query as {
                 interestedIn: string;
                 areaLocality: string;
                 ageGroup?: string;
                 hobbies?: string[];
+                page?: number;
+                perPage?: number;
             };
 
             let filters: any = {
@@ -67,6 +70,13 @@ export class UserFeedController {
                     return userHobbies.some(hobby => userHobbiesArr.includes(hobby));
                 });
             }
+
+            if (page && perPage) {
+                const startIndex = (page - 1) * perPage;
+                const endIndex = startIndex + perPage;
+                users = users.slice(startIndex, endIndex);
+            }
+            await createApiLogger(request, stime);
             return h.response(users).code(200);
 
         } catch (error) {

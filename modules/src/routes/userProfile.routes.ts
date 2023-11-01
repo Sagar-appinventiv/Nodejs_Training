@@ -24,6 +24,7 @@ const userProfileRoutes: ServerRoute[] = [
                     mobileNo: Joi.string().required(),
                     dateOfBirth: Joi.string().isoDate().required(),
                     gender: Joi.string().valid('male', 'female').required(),
+                    bio: Joi.string().required()
                 }),
             },
         },
